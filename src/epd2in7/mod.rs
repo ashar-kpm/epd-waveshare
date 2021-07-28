@@ -21,7 +21,7 @@ use self::command::Command;
 #[cfg(feature = "graphics")]
 mod graphics;
 #[cfg(feature = "graphics")]
-pub use self::graphics::Display7in5;
+pub use self::graphics::Display2in7;
 
 /// Width of the display
 pub const WIDTH: u32 = 264;
