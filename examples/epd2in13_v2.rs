@@ -19,6 +19,7 @@ use linux_embedded_hal::{
     Delay, Pin, Spidev,
 };
 
+// The pins in this example are for the Universal e-Paper Raw Panel Driver HAT
 // activate spi, gpio in raspi-config
 // needs to be run with sudo because of some sysfs_gpio permission problems and follow-up timing problems
 // see https://github.com/rust-embedded/rust-sysfs-gpio/issues/5 and follow-up issues
@@ -41,19 +42,19 @@ fn main() -> Result<(), std::io::Error> {
     cs.set_direction(Direction::Out).expect("CS Direction");
     cs.set_value(1).expect("CS Value set to 1");
 
-    let busy = Pin::new(5); //pin 29
+    let busy = Pin::new(24); // GPIO 24, board J-18
     busy.export().expect("busy export");
     while !busy.is_exported() {}
     busy.set_direction(Direction::In).expect("busy Direction");
     //busy.set_value(1).expect("busy Value set to 1");
 
-    let dc = Pin::new(6); //pin 31 //bcm6
+    let dc = Pin::new(25); // GPIO 25, board J-22
     dc.export().expect("dc export");
     while !dc.is_exported() {}
     dc.set_direction(Direction::Out).expect("dc Direction");
     dc.set_value(1).expect("dc Value set to 1");
 
-    let rst = Pin::new(16); //pin 36 //bcm16
+    let rst = Pin::new(17); // GPIO 17, board J-11
     rst.export().expect("rst export");
     while !rst.is_exported() {}
     rst.set_direction(Direction::Out).expect("rst Direction");
@@ -79,7 +80,7 @@ fn main() -> Result<(), std::io::Error> {
     display.set_rotation(DisplayRotation::Rotate270);
     draw_text(&mut display, "Rotate 270!", 5, 50);
 
-    epd2in13.update_frame(&mut spi, &display.buffer(), &mut delay)?;
+    epd2in13.update_frame(&mut spi, display.buffer(), &mut delay)?;
     epd2in13
         .display_frame(&mut spi, &mut delay)
         .expect("display frame new graphics");
@@ -133,7 +134,7 @@ fn main() -> Result<(), std::io::Error> {
         draw_text(&mut display, "  Hello World! ", 5 + i * 12, 50);
 
         epd2in13
-            .update_and_display_frame(&mut spi, &display.buffer(), &mut delay)
+            .update_and_display_frame(&mut spi, display.buffer(), &mut delay)
             .expect("display frame new graphics");
         delay.delay_ms(1_000u16);
     }
@@ -142,7 +143,7 @@ fn main() -> Result<(), std::io::Error> {
     // the screen can refresh for this kind of change (small single character)
     display.clear_buffer(Color::White);
     epd2in13
-        .update_and_display_frame(&mut spi, &display.buffer(), &mut delay)
+        .update_and_display_frame(&mut spi, display.buffer(), &mut delay)
         .unwrap();
 
     let spinner = ["|", "/", "-", "\\"];
@@ -150,7 +151,7 @@ fn main() -> Result<(), std::io::Error> {
         display.clear_buffer(Color::White);
         draw_text(&mut display, spinner[i % spinner.len()], 10, 100);
         epd2in13
-            .update_and_display_frame(&mut spi, &display.buffer(), &mut delay)
+            .update_and_display_frame(&mut spi, display.buffer(), &mut delay)
             .unwrap();
     }
 
